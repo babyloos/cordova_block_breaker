@@ -9,9 +9,6 @@ function setup() {
 function draw() {
   // clear screen
   background('#000000');
-  // draw bar
-  fill(color('#FF0000'));
-  rect(bar.x, bar.y, bar.width, bar.height);
   // move bar
   bar.x = mouseX - bar.width / 2;
   if (bar.x < 0) {
@@ -19,6 +16,9 @@ function draw() {
   } else if (bar.x + bar.width > windowWidth) {
     bar.x = windowWidth - bar.width;
   }
+  // draw bar
+  fill(color('#FF0000'));
+  rect(bar.x, bar.y, bar.width, bar.height);
 }
 
 class Bar {
