@@ -1,10 +1,14 @@
-let bar, ball, blocks;
+let bar, balls, blocks;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+
   // create bar
   bar = new Bar();
-  ball = new Ball();
+  const ball = new Ball();
+  balls = new Array();
+  balls.push(ball);
+
   // create blocks
   blocks = new Array();
   for (var i=0; i<3; i++) {
@@ -27,28 +31,41 @@ function draw() {
     bar.x = windowWidth - bar.width;
   }
 
-  // move ball
-  ball.move();
-  ball.reflectionBar(bar);
-  for (var i=0; i<blocks.length; i++) {
-    ball.reflectionBlock(blocks[i]);
+  const hitItemBlockCallback = function(x, y) {
+    const ball = new Ball();
+    ball.x = x;
+    ball.y = y;
+    balls.push(ball);
+  };
+
+  // move balls
+  for (var i=0; i<balls.length; i++) {
+    const ball = balls[i];
+    ball.move();
+    ball.reflectionBar(bar);
+      for (var j=0; j<blocks.length; j++) {
+        ball.reflectionBlock(blocks[j], hitItemBlockCallback);
+      }
   }
   
   // draw bar
   fill(color('#FF0000'));
   rect(bar.x, bar.y, bar.width, bar.height);
 
-  // draw ball
-  fill(color('#0000FF'));
-  ellipse(ball.x, ball.y, ball.width, ball.height);
+  // draw balls
+  for (var i=0; i<balls.length; i++) {
+    const ball = balls[i];
+    fill(ball.color);
+    ellipse(ball.x, ball.y, ball.width, ball.height);
+  }
 
   // draw blocks
-  fill(color('#00FF00'));
   for (var i=0; i<blocks.length; i++) {
     const block = blocks[i];
     if (!block.isEnable) {
       continue;
     }
+    fill(block.color);
     rect(block.x, block.y, block.width, block.height);
   }
 }
@@ -67,6 +84,11 @@ class Ball {
   y = windowHeight / 2 - this.height / 2;
   vx = 5;
   vy = 5;
+  color;
+
+  constructor() {
+    this.color = color(randomInt(100, 255), randomInt(100, 255), randomInt(100, 255));
+  }
 
   move() {
     this.x += this.vx;
@@ -87,7 +109,7 @@ class Ball {
     }
   }
 
-  reflectionBlock(block) {
+  reflectionBlock(block, hitItemCallBack) {
     if (!block.isEnable) {
       return;
     }
@@ -96,6 +118,9 @@ class Ball {
       this.vx *= -1;
       this.vy *= -1;
       block.isEnable = false;
+      if (block.isItemBlock) {
+        hitItemCallBack(this.x, this.y);
+      }
     }
   }
 }
@@ -108,9 +133,20 @@ class Block {
   y = 0;
   offsetX = 40;
   offsetY = 50;
+  color = color(0, 255, 0);
+  isItemBlock = false;
 
   constructor(column, row) {
     this.x = column * this.width + this.offsetX;
     this.y = row * this.height + this.offsetY;
+    if (randomInt(0, 1) === 0) {
+      console.log('isItemBlock');
+      this.isItemBlock = true;
+      this.color = color(255, 0, 0);
+    }
   }
+}
+
+function randomInt(min, max) {
+  return Math.floor(random() * (max + 1 - min)) + min; 
 }
