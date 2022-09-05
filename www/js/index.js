@@ -1,4 +1,5 @@
 let bar, balls, blocks;
+let gameClear = false;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -17,11 +18,32 @@ function setup() {
       blocks.push(block);
     }
   }
+
+  textAlign(CENTER, CENTER);
+  textSize(32);
 }
 
 function draw() {
   // clear screen
   background('#000000');
+
+  if (gameClear) {
+    fill(color('#39FF50'));
+    text('GAME CLEAR', windowWidth / 2, windowHeight / 2);
+    return;
+  }
+
+  // check game clear
+  let enableBlockCount = 0;
+  for (var i=0; i<blocks.length; i++) {
+    if (blocks[i].isEnable) {
+      enableBlockCount += 1;
+    }
+  }
+
+  if (enableBlockCount == 0) {
+    gameClear = true;
+  }
 
   // move bar
   bar.x = mouseX - bar.width / 2;
@@ -140,7 +162,6 @@ class Block {
     this.x = column * this.width + this.offsetX;
     this.y = row * this.height + this.offsetY;
     if (randomInt(0, 1) === 0) {
-      console.log('isItemBlock');
       this.isItemBlock = true;
       this.color = color(255, 0, 0);
     }
