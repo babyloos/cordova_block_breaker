@@ -1,5 +1,6 @@
 let bar, balls, blocks;
 let gameClear = false;
+let gameOver = false;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -33,6 +34,12 @@ function draw() {
     return;
   }
 
+  if (gameOver) {
+    fill(color('#FF5050'));
+    text('GAME OVER', windowWidth / 2, windowHeight / 2);
+    return;
+  }
+
   // check game clear
   let enableBlockCount = 0;
   for (var i=0; i<blocks.length; i++) {
@@ -43,6 +50,18 @@ function draw() {
 
   if (enableBlockCount == 0) {
     gameClear = true;
+  }
+
+  // check game over
+  let enableBallCount = 0;
+  for (var i=0; i<balls.length; i++) {
+    if (balls[i].isEnable) {
+      enableBallCount += 1;
+    }
+  }
+
+  if (enableBallCount == 0) {
+    gameOver = true;
   }
 
   // move bar
@@ -77,6 +96,9 @@ function draw() {
   // draw balls
   for (var i=0; i<balls.length; i++) {
     const ball = balls[i];
+    if (!ball.isEnable) {
+      continue;
+    }
     fill(ball.color);
     ellipse(ball.x, ball.y, ball.width, ball.height);
   }
@@ -100,6 +122,7 @@ class Bar {
 }
 
 class Ball {
+  isEnable = true;
   width = 25;
   height = 25;
   x = windowWidth / 2 - this.width / 2;
@@ -113,6 +136,10 @@ class Ball {
   }
 
   move() {
+    if (!this.isEnable) {
+      return; 
+    }
+
     this.x += this.vx;
     this.y += this.vy;
 
@@ -120,8 +147,13 @@ class Ball {
     if (this.x < 0 || this.x > windowWidth) {
       this.vx *= -1;
     }
-    if (this.y < 0 || this.y > windowHeight) {
+    if (this.y < 0 ) {
       this.vy *= -1;
+    }
+
+    // drop ball
+    if (this.y > windowHeight) {
+      this.isEnable = false;
     }
   }
 
