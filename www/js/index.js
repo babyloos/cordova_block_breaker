@@ -1,15 +1,24 @@
-let bar, ball;
+let bar, ball, blocks;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   // create bar
   bar = new Bar();
   ball = new Ball();
+  // create blocks
+  blocks = new Array();
+  for (var i=0; i<3; i++) {
+    for (var j=0; j<5; j++) {
+      const block = new Block(j, i);
+      blocks.push(block);
+    }
+  }
 }
 
 function draw() {
   // clear screen
   background('#000000');
+
   // move bar
   bar.x = mouseX - bar.width / 2;
   if (bar.x < 0) {
@@ -21,6 +30,9 @@ function draw() {
   // move ball
   ball.move();
   ball.reflectionBar(bar);
+  for (var i=0; i<blocks.length; i++) {
+    ball.reflectionBlock(blocks[i]);
+  }
   
   // draw bar
   fill(color('#FF0000'));
@@ -29,6 +41,16 @@ function draw() {
   // draw ball
   fill(color('#0000FF'));
   ellipse(ball.x, ball.y, ball.width, ball.height);
+
+  // draw blocks
+  fill(color('#00FF00'));
+  for (var i=0; i<blocks.length; i++) {
+    const block = blocks[i];
+    if (!block.isEnable) {
+      continue;
+    }
+    rect(block.x, block.y, block.width, block.height);
+  }
 }
 
 class Bar {
@@ -60,10 +82,35 @@ class Ball {
   }
 
   reflectionBar(bar) {
-    if (this.x > bar.x && this.x + this.width < bar.x + bar.width &&
-        this.y > bar.y && this.y + this.height < bar.y + bar.height) {
-      this.vx *= -1;
+    if (this.x > bar.x && this.x < bar.x + bar.width && this.y > bar.y && this.y < bar.y + bar.height) {
       this.vy *= -1;
     }
+  }
+
+  reflectionBlock(block) {
+    if (!block.isEnable) {
+      return;
+    }
+
+    if (this.x > block.x && this.x < block.x + block.width && this.y > block.y && this.y < block.y + block.height) {
+      this.vx *= -1;
+      this.vy *= -1;
+      block.isEnable = false;
+    }
+  }
+}
+
+class Block {
+  isEnable = true;
+  width = 70;
+  height = 30;
+  x = 0;
+  y = 0;
+  offsetX = 40;
+  offsetY = 50;
+
+  constructor(column, row) {
+    this.x = column * this.width + this.offsetX;
+    this.y = row * this.height + this.offsetY;
   }
 }
